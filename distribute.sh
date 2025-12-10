@@ -2,7 +2,7 @@
 
 # Script para instalar dependencias y ejecutar prueba_impresion.py
 
-set -e  # Salir si hay algún error
+# No usar set -e para permitir mejor manejo de errores
 
 echo "🔍 Verificando dependencias..."
 
@@ -94,7 +94,11 @@ echo "🚀 Ejecutando prueba_impresion.py..."
 echo ""
 
 # Ejecutar el script Python
-python3 prueba_impresion.py
-
-echo ""
-echo "✅ Script ejecutado correctamente"
+if python3 prueba_impresion.py; then
+    echo ""
+    echo "✅ Script ejecutado correctamente"
+else
+    echo ""
+    echo "❌ Error al ejecutar el script"
+    exit 1
+fi
