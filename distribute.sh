@@ -36,11 +36,35 @@ else
     echo "✅ requests instalado correctamente"
 fi
 
-# Verificar lpr (comando de impresión en Unix/macOS)
-if ! command -v lpr &> /dev/null; then
-    echo "⚠️  Advertencia: lpr no está disponible. La impresión puede fallar en sistemas Unix/macOS."
+# Verificar CUPS (sistema de impresión para Linux/Raspberry Pi)
+if ! command -v lp &> /dev/null; then
+    echo "⚠️  lp (CUPS) no está disponible. Intentando instalar CUPS..."
+    if command -v apt-get &> /dev/null; then
+        sudo apt-get update -qq
+        sudo apt-get install -y cups cups-client || {
+            echo "⚠️  No se pudo instalar CUPS automáticamente. Por favor instálalo manualmente: sudo apt-get install cups cups-client"
+        }
+    elif command -v yum &> /dev/null; then
+        sudo yum install -y cups cups-libs || {
+            echo "⚠️  No se pudo instalar CUPS automáticamente. Por favor instálalo manualmente: sudo yum install cups cups-libs"
+        }
+    else
+        echo "⚠️  No se pudo detectar el gestor de paquetes. Por favor instala CUPS manualmente."
+    fi
+fi
+
+# Verificar lp después de intentar instalación
+if command -v lp &> /dev/null; then
+    echo "✅ lp (CUPS) encontrado"
+    # Mostrar impresora por defecto si está disponible
+    if lpstat -d &> /dev/null; then
+        DEFAULT_PRINTER=$(lpstat -d 2>/dev/null | grep -oP 'system default destination: \K.*' || echo "no configurada")
+        echo "   Impresora por defecto: $DEFAULT_PRINTER"
+    fi
+elif command -v lpr &> /dev/null; then
+    echo "✅ lpr encontrado (comando de impresión alternativo)"
 else
-    echo "✅ lpr encontrado (comando de impresión disponible)"
+    echo "⚠️  Advertencia: No se encontró comando de impresión (lp o lpr). La impresión puede fallar."
 fi
 
 echo ""
